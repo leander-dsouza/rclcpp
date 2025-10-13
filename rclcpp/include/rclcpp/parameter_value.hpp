@@ -53,6 +53,44 @@ RCLCPP_PUBLIC
 std::ostream &
 operator<<(std::ostream & os, ParameterType type);
 
+/// Helper function to get ParameterType from template
+template<typename T>
+constexpr ParameterType get_parameter_type()
+{
+  if constexpr (std::is_same<T, bool>::value) {
+    return ParameterType::PARAMETER_BOOL;
+  }
+  if constexpr (std::is_integral<T>::value && !std::is_same<T, bool>::value) {
+    return ParameterType::PARAMETER_INTEGER;
+  }
+  if constexpr (std::is_floating_point<T>::value) {
+    return ParameterType::PARAMETER_DOUBLE;
+  }
+  if constexpr (std::is_convertible<T, std::string>::value) {
+    return ParameterType::PARAMETER_STRING;
+  }
+  if constexpr (std::is_same<T, std::vector<uint8_t>>::value) {
+    return ParameterType::PARAMETER_BYTE_ARRAY;
+  }
+  if constexpr (std::is_same<T, std::vector<bool>>::value) {
+    return ParameterType::PARAMETER_BOOL_ARRAY;
+  }
+  if constexpr (std::is_same<T, std::vector<int64_t>>::value ||
+    std::is_same<T, std::vector<int>>::value)
+  {
+    return ParameterType::PARAMETER_INTEGER_ARRAY;
+  }
+  if constexpr (std::is_same<T, std::vector<double>>::value ||
+    std::is_same<T, std::vector<float>>::value)
+  {
+    return ParameterType::PARAMETER_DOUBLE_ARRAY;
+  }
+  if constexpr (std::is_same<T, std::vector<std::string>>::value) {
+    return ParameterType::PARAMETER_STRING_ARRAY;
+  }
+  return ParameterType::PARAMETER_NOT_SET;
+}
+
 /// Indicate the parameter type does not match the expected type.
 class ParameterTypeException : public std::runtime_error
 {
